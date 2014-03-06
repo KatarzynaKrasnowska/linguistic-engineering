@@ -4,7 +4,6 @@
 
 import sys, os
 from xml.sax import saxutils, handler, make_parser
-import codecs
 
 def spaces(count = 0):
     result = ''
@@ -162,20 +161,3 @@ class TreeHandler(handler.ContentHandler):
 
     def __str__(self):
         return 'tree(%s)' % str(self._root)
-
-############### TEST ##############
-
-with codecs.open('output_test.xml', encoding='utf_8', mode='w') as output:
-    parser = make_parser()
-    parser.setContentHandler(TreeHandler(output))
-    parser.parse('input_test.xml')
-    tree = parser.getContentHandler()
-    sentence = tree.getNextSentence()
-    while sentence is not None:
-        words = sentence.split(' ')
-        tokens = []
-        for word in words:
-            tokens.append((word,'word'))
-        tree.setTokenization(tokens)
-        sentence = tree.getNextSentence()
-    tree.printTokenization()

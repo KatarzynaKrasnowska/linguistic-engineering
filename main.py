@@ -3,16 +3,24 @@
 # -*- coding: utf-8 -*-
 
 import codecs
+import re
 import sys
 
+from dates import parse_dates
 from ext_tokenizer_xml_parsing import make_parser, TreeHandler
 from token import assign_tags
 
+interpunction = '():;-'
+
 def tokenize_sentence(sentence):
-    words = sentence.split(' ')
-    print words
-    return assign_tags(words)
-    
+    words = []
+    for w in sentence.split(' '):
+        ws = [token.strip() for token in re.split('^([\:\;\-\?\!\(\)])', w, re.UNICODE) if token.strip()]
+        words += ws[:-1]
+        w = ws[-1]
+        words += [token.strip() for token in re.split('([\:\;\-\?\!\(\)])$', w, re.UNICODE) if token.strip()]
+    return parse_dates(assign_tags(words))
+
 def main():
     if len(sys.argv) < 3:
         print 'Usage: main.py <input_xml> <output_xml>'
