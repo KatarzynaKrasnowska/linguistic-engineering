@@ -19,8 +19,10 @@ def abbreviation(tokens, i):
         else:
           abbrs.add(abbr)
   if tokens[i].endswith('.'):
-    if tokens[i][:-1] in dot_abbrs:
-      return [(tokens[i][:-1], TAGS.ABBR), ('.', TAGS.INTERP)]
+    t = tokens[i][:-1]
+    # abbreviation or name initial
+    if t in dot_abbrs or (len(t) == 1 and t.isupper()):
+      return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
   elif tokens[i] in abbrs:
     return [(tokens[i], TAGS.ABBR)]
 
@@ -60,7 +62,7 @@ def comma_separated_tokens(tokens, i):
 def word_with_dot(tokens, i):
   if tokens[i].endswith('.'):
     if i < len(tokens) - 1:
-      return [(tokens[i], ABBR)]
+      return [(tokens[i], TAGS.ABBR)]
     else:
       subtokens = [token.strip() for token in re.split('(\.)$', tokens[i], re.UNICODE)]
       tags = itertools.chain.from_iterable(
