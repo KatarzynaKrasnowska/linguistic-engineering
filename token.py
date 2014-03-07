@@ -72,19 +72,26 @@ def word_with_dot(tokens, i):
 def unknown_token(tokens, i):
   return [(tokens[i], TAGS.UNKNOWN)]
 
+interp_hyphens = u'\u2010\u2011\u2012\u2013\u2014\u2015'
+interp_quotes = u'\'"`\u2018\u201A\u201B\u201C\u201D\u201E\u201F'
+interp_not_dot = interp_hyphens + interp_quotes + u',:;-?!()'
+interp_regex = ur'[%s%s\,\:\;\.\-\?\!\(\)]' % (interp_hyphens, interp_quotes)
+
 SIMPLE_TAG_FILTERS = [
-    regexp_based_tag(r'^([0-9]+(,[0-9]+)?)$', TAGS.ARA),
+    regexp_based_tag(r'^([0-9]+)$', TAGS.INT),
+    regexp_based_tag(r'^([0-9]+,[0-9]+)$', TAGS.ARA),
     regexp_based_tag(r'^(([ivxlcdm]+)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
     regexp_based_tag(r'^([0-9]{0,2}[\-\.\/]((0?[1-9])|(1[0-2]))[\-\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
     month,
     regexp_based_tag(r'^(\w+)$', TAGS.WORD),
-    regexp_based_tag(r'^([\,\:\;\.\-\?\!\(\)])$', TAGS.INTERP),
+    regexp_based_tag(interp_regex, TAGS.INTERP),
     #regexp_based_tag(r'^(\w{1,3}\.)$', 'ABBR'),
     # Copy pasted regexp for url from: http://stackoverflow.com/questions/833469/regular-expression-for-url
     abbreviation,
     word_with_dot,
     regexp_based_tag(r'^(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(\:[0-9]+)*(/($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+))*$', TAGS.WWW),
     comma_separated_tokens,
+    regexp_based_tag(r'^[^@]+@[^@]+\.[^@]+', TAGS.EMAIL),
     unknown_token,
 ]
 

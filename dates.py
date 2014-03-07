@@ -19,6 +19,9 @@ rom_months = {
     'x' : 10, 'X' : 10, 'xi' : 11, 'XI' : 11, 'xii' : 12, 'XII' : 12,
 }
 
+clean_up = {m : TAGS.WORD for m in months}
+clean_up[TAGS.INT] = TAGS.ARA
+
 def parse_dates(tokens):
     tokens2 = []
     i = 0
@@ -39,9 +42,9 @@ def parse_dates(tokens):
             date = False
             day = None
             (word2, tag2), (word3, tag3) = tks[(i + 1):(i + 3)]
-            if tag == TAGS.ARA and tag2 in months and tag3 == TAGS.ARA:
+            if tag == TAGS.INT and tag2 in months and tag3 == TAGS.INT:
                 day, month, year = int(word), months[tag2], int(word3)
-            if tag == TAGS.ARA and tag2 == TAGS.ROM and word2 in rom_months and tag3 == TAGS.ARA:
+            if tag == TAGS.INT and tag2 == TAGS.ROM and word2 in rom_months and tag3 == TAGS.INT:
                 day, month, year = int(word), rom_months[word2], int(word3)
             if day:
                 if day in xrange(1, 32) and month in xrange(1, 13):
@@ -63,5 +66,6 @@ def parse_dates(tokens):
         else:
             i += 1
         tokens2.append((word, tag))
-    # Finally, replace unused month tags with word tag
-    return [(word, TAGS.WORD if tag in months else tag) for (word, tag) in tokens2]
+    # Replace unused month tags with word tag
+    # Replace unused int tags with ara tag
+    return [(word, clean_up[tag] if tag in clean_up else tag) for (word, tag) in tokens2]

@@ -12,6 +12,7 @@ class TAGS:
     WORD = 'word'
     WWW = 'www'
     # helper tags
+    INT = 'int'
     DATE = 'date'
     M_I = 'm-i'
     M_II = 'm-ii'
