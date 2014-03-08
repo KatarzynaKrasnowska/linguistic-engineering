@@ -4,7 +4,7 @@
 
 class TAGS:
     # basic tags
-    ABBR = 'abbr'
+    ABBR = 'abbrev'
     ARA = 'ara'
     EMAIL = 'email'
     INTERP = 'interp'

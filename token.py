@@ -10,6 +10,11 @@ from tags import TAGS
 abbrs = set()
 dot_abbrs = set()
 
+def ara_with_dot(tokens, i):
+  match = re.match(r'^([0-9]+\.)$', tokens[i], re.UNICODE)
+  if match is not None:
+    return [(tokens[i][:-1], TAGS.ARA), (u'.', TAGS.INTERP)]
+
 def abbreviation(tokens, i):
   if not abbrs:
     with codecs.open('skroty.txt', encoding='utf_8', mode='r') as f:
@@ -73,13 +78,15 @@ def unknown_token(tokens, i):
   return [(tokens[i], TAGS.UNKNOWN)]
 
 interp_hyphens = u'\u2010\u2011\u2012\u2013\u2014\u2015'
-interp_quotes = u'\'"`\u2018\u201A\u201B\u201C\u201D\u201E\u201F'
+# the last sign here is a triple dot :)
+interp_quotes = u'\'"`\u2018\u201A\u201B\u201C\u201D\u201E\u201F\u2026'
 interp_not_dot = interp_hyphens + interp_quotes + u',:;-?!()'
 interp_regex = ur'[%s%s\,\:\;\.\-\?\!\(\)]' % (interp_hyphens, interp_quotes)
 
 SIMPLE_TAG_FILTERS = [
     regexp_based_tag(r'^([0-9]+)$', TAGS.INT),
     regexp_based_tag(r'^([0-9]+,[0-9]+)$', TAGS.ARA),
+    ara_with_dot,
     regexp_based_tag(r'^(([ivxlcdm]+)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
     regexp_based_tag(r'^([0-9]{0,2}[\-\.\/]((0?[1-9])|(1[0-2]))[\-\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
     month,

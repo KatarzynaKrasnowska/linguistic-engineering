@@ -22,9 +22,15 @@ def tokenize_sentence(sentence):
             w = w[1:]
         # word ends with a non-dot punctuation
         # or a dot preceded by other punctuation (not an abbreviation)
-        while ((w and w[-1] in interp_not_dot) or (len(w) > 1 and w[-1] == u'.' and w[-2] in interp_not_dot)):
-            ws = [w[-1]] + ws
-            w = w[:-1]
+        while ((w and w[-1] in interp_not_dot) or
+                (len(w) > 1 and w[-1] == u'.' and w[-2] in interp_not_dot) or
+                (w.endswith(u'...'))):
+            if w.endswith(u'...'):
+                ws = [u'.', u'.', u'.'] + ws
+                w = w[:-3]
+            else:
+                ws = [w[-1]] + ws
+                w = w[:-1]
         if w:
             words.append(w)
         words += ws
