@@ -26,7 +26,7 @@ def abbreviation(tokens, i):
   if tokens[i].endswith('.'):
     t = tokens[i][:-1]
     # abbreviation or name initial
-    if t in dot_abbrs or (len(t) == 1 and t.isupper()):
+    if t in dot_abbrs.union(abbrs) or (len(t) == 1 and t.isupper()):
       return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
   elif tokens[i] in abbrs:
     return [(tokens[i], TAGS.ABBR)]
@@ -64,6 +64,20 @@ def comma_separated_tokens(tokens, i):
     tags = itertools.chain.from_iterable(assign_tag(subtokens, i) for i, token in enumerate(subtokens) if token)
     return tags
 
+def hyphen_separated_tokens(tokens, i):
+  hyphen_regex = ur'(.*?)([%s\-])(.*)$' % interp_hyphens
+  subtokens = []
+  token = tokens[i]
+  m = re.match(hyphen_regex, tokens[i], re.UNICODE)
+  while m:
+    t1, hyph, token = m.group(1,2,3)
+    subtokens += [t1, hyph]
+    m = re.match(hyphen_regex, token, re.UNICODE)
+  subtokens.append(token)
+  if len(subtokens) > 1:
+    tags = itertools.chain.from_iterable(assign_tag(subtokens, i) for i, token in enumerate(subtokens) if token)
+    return tags
+
 def word_with_dot(tokens, i):
   if tokens[i].endswith('.'):
     if i < len(tokens) - 1:
@@ -87,17 +101,19 @@ SIMPLE_TAG_FILTERS = [
     regexp_based_tag(r'^([0-9]+)$', TAGS.INT),
     regexp_based_tag(r'^([0-9]+,[0-9]+)$', TAGS.ARA),
     ara_with_dot,
-    regexp_based_tag(r'^(([ivxlcdm]+)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
+    # previous version treated "i" as a roman number :)
+    regexp_based_tag(r'^(([vxlcdm][ivxlcdm]*)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
     regexp_based_tag(r'^([0-9]{0,2}[\-\.\/]((0?[1-9])|(1[0-2]))[\-\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
     month,
+    abbreviation,
     regexp_based_tag(r'^(\w+)$', TAGS.WORD),
     regexp_based_tag(interp_regex, TAGS.INTERP),
     #regexp_based_tag(r'^(\w{1,3}\.)$', 'ABBR'),
     # Copy pasted regexp for url from: http://stackoverflow.com/questions/833469/regular-expression-for-url
-    abbreviation,
     word_with_dot,
     regexp_based_tag(r'^(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(\:[0-9]+)*(/($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+))*$', TAGS.WWW),
     comma_separated_tokens,
+    hyphen_separated_tokens,
     regexp_based_tag(r'^[^@]+@[^@]+\.[^@]+', TAGS.EMAIL),
     unknown_token,
 ]
