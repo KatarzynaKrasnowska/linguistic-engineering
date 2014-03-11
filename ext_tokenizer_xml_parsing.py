@@ -118,7 +118,10 @@ class TreeHandler(handler.ContentHandler):
 
     def characters(self, content):
         if (self._sentence and content.strip()):
-            self._current._content = Sentence(content)
+            if self._current._content is None:
+              self._current._content = Sentence(content)
+            else:
+              self._current._content._text += ' ' + content
 
 # initializing leaf walk
 
