@@ -102,7 +102,7 @@ SIMPLE_TAG_FILTERS = [
     regexp_based_tag(r'^([0-9]+,[0-9]+)$', TAGS.ARA),
     ara_with_dot,
     # previous version treated "i" as a roman number :)
-    regexp_based_tag(r'^(([vxlcdm][ivxlcdm]*)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
+    regexp_based_tag(r'^(([vxlcdm][ivxlcdm]*)|([VXLCDM][IVXLCDM]*))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
     regexp_based_tag(r'^([0-9]{0,2}[\-\.\/]((0?[1-9])|(1[0-2]))[\-\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
     month,
     abbreviation,
