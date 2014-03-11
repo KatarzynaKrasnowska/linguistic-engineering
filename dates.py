@@ -28,6 +28,7 @@ def parse_dates(tokens):
     tks = list(tokens)
     while i < len(tks):
         word, tag = tks[i]
+        date = False
         if tag == TAGS.DATE:
             tag = TAGS.WORD
             m = re.match(r'(\d+).(\d+).(\d+)', word)
@@ -37,9 +38,9 @@ def parse_dates(tokens):
                 day, month, year = (int(x) for x in m.group(1, 2, 3))
                 if day in xrange(1, 32) and month in xrange(1, 13):
                     tag = '%04d.%02d.%02d' % (year, month, day)
+                    date = True
             i += 1
         elif i < len(tks) - 2:
-            date = False
             day = None
             (word2, tag2), (word3, tag3) = tks[(i + 1):(i + 3)]
             # 11 marca 2014
@@ -57,18 +58,6 @@ def parse_dates(tokens):
                     date = True
                     word = ' '.join((word, word2, word3))
                     i += 3
-            # append r(.) to the date if present
-            if date and i < len(tks):
-                word4, tag4 = tks[i]
-                if tag4 == TAGS.ABBR and word4 == u'r':
-                    word += u' r'
-                    i += 1
-                    if i < len(tks) and tks[i][0] == u'.':
-                        word += '.' 
-                        i += 1
-                if word4 == u'roku':
-                    word += u' roku'
-                    i += 1
             # 2014, 11 marca - strange, but found in NKJP
             if not date and i < len(tks) - 3:
                 (word4, tag4) = word4, tag4 = tks[i + 3]
@@ -83,6 +72,18 @@ def parse_dates(tokens):
                 i += 1
         else:
             i += 1
+        # append roku / r(.) to the date if present
+        if date and i < len(tks):
+            w, t = tks[i]
+            if w == u'r':
+                word += u' r'
+                i += 1
+                if i < len(tks) and tks[i][0] == u'.':
+                    word += '.' 
+                    i += 1
+            if w == u'roku':
+                word += u' roku'
+                i += 1
         tokens2.append((word, tag))
     # Replace unused month tags with word tag
     # Replace unused int tags with ara tag

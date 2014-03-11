@@ -14,6 +14,11 @@ def ara_with_dot(tokens, i):
   match = re.match(r'^([0-9]+\.)$', tokens[i], re.UNICODE)
   if match is not None:
     return [(tokens[i][:-1], TAGS.ARA), (u'.', TAGS.INTERP)]
+  # 03.2014 - treat as ara-punct-ara
+  match = re.match(r'^([0-9]+)\.([0-9]+)$', tokens[i], re.UNICODE)
+  if match is not None:
+    return [(match.group(1), TAGS.ARA), (u'.', TAGS.INTERP), (match.group(2), TAGS.ARA)]
+
 
 def conjunction_i(tokens, i):
   if i == 0 and tokens[i] == u'I':
@@ -100,8 +105,8 @@ def unknown_token(tokens, i):
 interp_hyphens = u'\u2010\u2011\u2012\u2013\u2014\u2015'
 # the last sign here is a triple dot :)
 interp_quotes = u'\'"`\u2018\u201A\u201B\u201C\u201D\u201E\u201F\u2026'
-interp_not_dot = interp_hyphens + interp_quotes + u',:;-?!()'
-interp_regex = ur'[%s%s\,\:\;\.\-\?\!\(\)]' % (interp_hyphens, interp_quotes)
+interp_not_dot = interp_hyphens + interp_quotes + u',:;-?!()[]'
+interp_regex = ur'[%s%s\,\:\;\.\-\?\!\(\)\[\]]' % (interp_hyphens, interp_quotes)
 
 SIMPLE_TAG_FILTERS = [
     regexp_based_tag(r'^([0-9]+)$', TAGS.INT),
@@ -110,7 +115,7 @@ SIMPLE_TAG_FILTERS = [
     # "i" and "I" at the beginning of a sentence are not roman numbers :)
     conjunction_i,
     regexp_based_tag(r'^(([ivxlcdm]+)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
-    regexp_based_tag(r'^([0-9]{0,2}[\-\.\/]((0?[1-9])|(1[0-2]))[\-\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
+    regexp_based_tag(r'^([0-9]{0,2}[\.\/]((0?[1-9])|(1[0-2]))[\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
     month,
     abbreviation,
     regexp_based_tag(r'^(\w+)$', TAGS.WORD),

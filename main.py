@@ -14,7 +14,7 @@ interpunction = u'():;-'
 
 def tokenize_sentence(sentence):
     words = []
-    for w in sentence.split(' '):
+    for w in [w for w in re.split('([\s\(\)\[\]\:\;])', sentence) if w.strip()]:
         ws = []
         # punctuation preceding a word: split into separate tokens
         while w and w[0] in interp_not_dot:
