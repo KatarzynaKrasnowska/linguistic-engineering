@@ -53,7 +53,6 @@ def main():
         tree = parser.getContentHandler()
         sentence = tree.getNextSentence()
         while sentence is not None:
-            words = sentence.split(' ')
             tokens = tokenize_sentence(sentence)
             tree.setTokenization(tokens)
             sentence = tree.getNextSentence()
