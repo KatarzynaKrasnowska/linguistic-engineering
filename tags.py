@@ -7,7 +7,7 @@ class TAGS:
     ABBR = 'abbrev'
     ARA = 'ara'
     EMAIL = 'email'
-    INTERP = 'interp'
+    INTERP = 'punct'
     ROM = 'rom'
     WORD = 'word'
     WWW = 'www'
