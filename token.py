@@ -15,6 +15,12 @@ def ara_with_dot(tokens, i):
   if match is not None:
     return [(tokens[i][:-1], TAGS.ARA), (u'.', TAGS.INTERP)]
 
+def conjunction_i(tokens, i):
+  if i == 0 and tokens[i] == u'I':
+    return [(tokens[i], TAGS.WORD)]
+  if tokens[i] == u'i':
+    return [(tokens[i], TAGS.WORD)]
+
 def abbreviation(tokens, i):
   if not abbrs:
     with codecs.open('skroty.txt', encoding='utf_8', mode='r') as f:
@@ -101,8 +107,9 @@ SIMPLE_TAG_FILTERS = [
     regexp_based_tag(r'^([0-9]+)$', TAGS.INT),
     regexp_based_tag(r'^([0-9]+,[0-9]+)$', TAGS.ARA),
     ara_with_dot,
-    # previous version treated "i" as a roman number :)
-    regexp_based_tag(r'^(([vxlcdm][ivxlcdm]*)|([VXLCDM][IVXLCDM]*))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
+    # "i" and "I" at the beginning of a sentence are not roman numbers :)
+    conjunction_i,
+    regexp_based_tag(r'^(([ivxlcdm]+)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
     regexp_based_tag(r'^([0-9]{0,2}[\-\.\/]((0?[1-9])|(1[0-2]))[\-\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
     month,
     abbreviation,

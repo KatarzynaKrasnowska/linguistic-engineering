@@ -42,10 +42,15 @@ def parse_dates(tokens):
             date = False
             day = None
             (word2, tag2), (word3, tag3) = tks[(i + 1):(i + 3)]
+            # 11 marca 2014
             if tag == TAGS.INT and tag2 in months and tag3 == TAGS.INT:
                 day, month, year = int(word), months[tag2], int(word3)
+            # 11 III 2014
             if tag == TAGS.INT and tag2 == TAGS.ROM and word2 in rom_months and tag3 == TAGS.INT:
                 day, month, year = int(word), rom_months[word2], int(word3)
+            # 2014 11 marca - strange, but found in NKJP
+            if tag == TAGS.INT and tag2 == TAGS.INT and tag3 in months:
+                day, month, year = int(word2), months[tag3], int(word)
             if day:
                 if day in xrange(1, 32) and month in xrange(1, 13):
                     tag = '%04d.%02d.%02d' % (year, month, day)
@@ -55,13 +60,26 @@ def parse_dates(tokens):
             # append r(.) to the date if present
             if date and i < len(tks):
                 word4, tag4 = tks[i]
-                if tag4 == TAGS.ABBR and word4 == 'r':
-                    word += ' r'
+                if tag4 == TAGS.ABBR and word4 == u'r':
+                    word += u' r'
                     i += 1
-                    if i < len(tks) and tks[i][0] == '.':
+                    if i < len(tks) and tks[i][0] == u'.':
                         word += '.' 
                         i += 1
-            else:
+                if word4 == u'roku':
+                    word += u' roku'
+                    i += 1
+            # 2014, 11 marca - strange, but found in NKJP
+            if not date and i < len(tks) - 3:
+                (word4, tag4) = word4, tag4 = tks[i + 3]
+                if tag == TAGS.INT and word2 == u',' and tag3 == TAGS.INT and tag4 in months:
+                    day, month, year = int(word3), months[tag4], int(word)
+                    if day in xrange(1, 32) and month in xrange(1, 13):
+                        tag = '%04d.%02d.%02d' % (year, month, day)
+                        date = True
+                        word = '%s, %s %s' % (word, word3, word4)
+                        i += 4
+            if not date:
                 i += 1
         else:
             i += 1
