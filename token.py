@@ -7,9 +7,6 @@ import itertools
 
 from tags import TAGS
 
-abbrs = set()
-dot_abbrs = set()
-
 def ara_with_dot(tokens, i):
   match = re.match(r'^([0-9]+\.)$', tokens[i], re.UNICODE)
   if match is not None:
@@ -26,20 +23,59 @@ def conjunction_i(tokens, i):
   if tokens[i] == u'i':
     return [(tokens[i], TAGS.WORD)]
 
+def name_abbrev(word):
+  upper = False # there are capital letters in name
+  if len(word) > 1: # we assume no 1 letter abbreviations here
+    if word[0].isupper():
+      for letter in word[1:len(word)]:
+        if letter.isupper():
+          upper = True
+  return upper
+    
+
+unit_names = set()
+unit_prefixes = set()
+units = set()
+abbrs = set()
+dot_abbrs = set()
+abbrs_all = set()
 def abbreviation(tokens, i):
   if not abbrs:
-    with codecs.open('skroty.txt', encoding='utf_8', mode='r') as f:
-      for abbr, _ in (l.split('\t') for l in f.readlines()):
-        if abbr.endswith('.'):
-          dot_abbrs.add(abbr[:-1])
-        else:
-          abbrs.add(abbr)
-  if tokens[i].endswith('.'):
+    # known dot abbreviations that can end sentence
+    with codecs.open('dots_sorted.txt', encoding='utf_8', mode='r') as f:
+      for abbr in f.readlines():
+        dot_abbrs.add(abbr[:-1])
+    # ceating possible names of physical units
+    with codecs.open('unit_names.txt', encoding='utf_8', mode='r') as f:
+      for name in f.readlines():
+        unit_names.add(name) # a (Are) is not included in file due to collisions
+    with codecs.open('unit_prefixes.txt', encoding='utf_8', mode='r') as f:
+      for prefix in f.readlines():
+        unit_prefixes.add(prefix)
+    for name in unit_names:
+      units.add(name)
+      for prefix in unit_prefixes:
+        units.add(prefix + name) # some nonsense may be added (like kha) but no polish word should be generated
+    # no-dot abbreviations
+    with codecs.open('uninflected.txt', encoding='utf_8', mode='r') as f:
+      for abbr in f.readlines():
+        abbrs.add(abbr)
+    with codecs.open('inflected.txt', encoding='utf_8', mode='r') as f:
+      for abbr in f.readlines():
+        abbrs.add(abbr) # @TODO: add some inflation in way similar to units
+    # union of all abbreviations
+    abbrs_all = abbrs.union(dot_abbrs).union(units)
+  if tokens[i].endswith('.'): # tokens ends with dot
     t = tokens[i][:-1]
-    # abbreviation or name initial
-    if t in dot_abbrs.union(abbrs) or (len(t) == 1 and t.isupper()):
+    # TODO: assuming roman numerals will be interpreped later and re-tagged
+    if i + 1 < len(tokens): # this is not sentence-ending dot
       return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
-  elif tokens[i] in abbrs:
+    else: # this is sentence-endig dot
+      if t in abbrs_all or (len(t) == 1 and t.isupper()): # known abbreviation or name initial
+        return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
+  elif tokens[i] in abbrs.union(units):
+    return [(tokens[i], TAGS.ABBR)]
+  elif name_abbrev(tokens[i]): # PZPR, PKiN, etc.; may lead to problems with fully capitalized words or roman numerals
     return [(tokens[i], TAGS.ABBR)]
 
 months = {
