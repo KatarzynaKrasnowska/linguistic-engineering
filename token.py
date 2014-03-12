@@ -40,6 +40,7 @@ abbrs = set()
 dot_abbrs = set()
 abbrs_all = set()
 def abbreviation(tokens, i):
+  global dot_abbrs, abbrs_all, unit_names, unit_prefixes, units, abbrs
   if not abbrs:
     # known dot abbreviations that can end sentence
     with codecs.open('dots_sorted.txt', encoding='utf_8', mode='r') as f:
