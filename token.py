@@ -17,6 +17,11 @@ def ara_with_dot(tokens, i):
     return [(match.group(1), TAGS.ARA), (u'.', TAGS.INTERP), (match.group(2), TAGS.ARA)]
 
 
+# Sentences starting with [WAUZO] (W czym, A co, U kogo, Z kim, O czym)
+def first_conj(tokens, i):
+  if i == 0 and tokens[i] in (u'W', u'A', u'U', u'Z', u'O'):
+    return [(tokens[i], TAGS.WORD)]
+
 def conjunction_i(tokens, i):
   if i == 0 and tokens[i] == u'I':
     return [(tokens[i], TAGS.WORD)]
@@ -45,14 +50,14 @@ def abbreviation(tokens, i):
     # known dot abbreviations that can end sentence
     with codecs.open('dots_sorted.txt', encoding='utf_8', mode='r') as f:
       for abbr in f.readlines():
-        dot_abbrs.add(abbr[:-1])
+        dot_abbrs.add(abbr.strip()[:-1])
     # ceating possible names of physical units
     with codecs.open('unit_names.txt', encoding='utf_8', mode='r') as f:
       for name in f.readlines():
-        unit_names.add(name) # a (Are) is not included in file due to collisions
+        unit_names.add(name.strip()) # a (Are) is not included in file due to collisions
     with codecs.open('unit_prefixes.txt', encoding='utf_8', mode='r') as f:
       for prefix in f.readlines():
-        unit_prefixes.add(prefix)
+        unit_prefixes.add(prefix.strip())
     for name in unit_names:
       units.add(name)
       for prefix in unit_prefixes:
@@ -60,12 +65,13 @@ def abbreviation(tokens, i):
     # no-dot abbreviations
     with codecs.open('uninflected.txt', encoding='utf_8', mode='r') as f:
       for abbr in f.readlines():
-        abbrs.add(abbr)
+        abbrs.add(abbr.strip())
     with codecs.open('inflected.txt', encoding='utf_8', mode='r') as f:
       for abbr in f.readlines():
-        abbrs.add(abbr) # @TODO: add some inflation in way similar to units
+        abbrs.add(abbr.strip()) # @TODO: add some inflation in way similar to units
     # union of all abbreviations
     abbrs_all = abbrs.union(dot_abbrs).union(units)
+
   if tokens[i].endswith('.'): # tokens ends with dot
     t = tokens[i][:-1]
     # TODO: assuming roman numerals will be interpreped later and re-tagged
@@ -151,6 +157,7 @@ SIMPLE_TAG_FILTERS = [
     ara_with_dot,
     # "i" and "I" at the beginning of a sentence are not roman numbers :)
     conjunction_i,
+    first_conj,
     regexp_based_tag(r'^(([ivxlcdm]+)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
     regexp_based_tag(r'^([0-9]{0,2}[\.\/]((0?[1-9])|(1[0-2]))[\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
     month,
@@ -164,7 +171,7 @@ SIMPLE_TAG_FILTERS = [
     comma_separated_tokens,
     hyphen_separated_tokens,
     regexp_based_tag(r'^[^@]+@[^@]+\.[^@]+', TAGS.EMAIL),
-    unknown_token,
+    unknown_token, # TODO: replace with always_word
 ]
 
 
