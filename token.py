@@ -72,7 +72,7 @@ def abbreviation(tokens, i):
     # union of all abbreviations
     abbrs_all = abbrs.union(dot_abbrs).union(units)
 
-  if tokens[i].endswith('.'): # tokens ends with dot
+  if tokens[i].endswith('.') and len(tokens[i]) > 1: # tokens ends with dot
     t = tokens[i][:-1]
     # TODO: assuming roman numerals will be interpreped later and re-tagged
     if i + 1 < len(tokens): # this is not sentence-ending dot
