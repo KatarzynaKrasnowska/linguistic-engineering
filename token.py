@@ -18,7 +18,8 @@ def ara_with_dot(tokens, i):
 
 def rom_with_dot(tokens, i):
   match = re.match(r'^(([ivxlcdm]+)|([IVXLCDM]+))\.$', tokens[i], re.UNICODE)
-  if match is not None:
+  # m. is rather 'miasto' than roman
+  if match is not None and tokens[i] != u'm.':
     return [(match.group(1), TAGS.ROM), (u'.', TAGS.INTERP)]
 
 # Sentences starting with [WAUZO] (W czym, A co, U kogo, Z kim, O czym)
