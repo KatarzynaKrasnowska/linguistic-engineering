@@ -97,7 +97,6 @@ def abbreviation(tokens, i):
     else: # we have dot(s) inside
       result = []
       for st in t:
-        print st
         result += [(st, TAGS.ABBR), ('.', TAGS.INTERP)]
       return result
   elif tokens[i] in abbrs.union(units):
