@@ -44,10 +44,12 @@ unit_names = set()
 unit_prefixes = set()
 units = set()
 abbrs = set()
+abbrs_base = set()
+abbrs_ending = set()
 dot_abbrs = set()
 abbrs_all = set()
 def abbreviation(tokens, i):
-  global dot_abbrs, abbrs_all, unit_names, unit_prefixes, units, abbrs
+  global dot_abbrs, abbrs_all, unit_names, unit_prefixes, units, abbrs, abbrs_base, abbrs_ending
   if not abbrs:
     # known dot abbreviations that can end sentence
     with codecs.open('dots_sorted.txt', encoding='utf_8', mode='r') as f:
@@ -68,9 +70,17 @@ def abbreviation(tokens, i):
     with codecs.open('uninflected.txt', encoding='utf_8', mode='r') as f:
       for abbr in f.readlines():
         abbrs.add(abbr.strip())
-    with codecs.open('inflected.txt', encoding='utf_8', mode='r') as f:
-      for abbr in f.readlines():
-        abbrs.add(abbr.strip()) # @TODO: add some inflation in way similar to units
+    # ceating possible names of physical units
+    with codecs.open('inflect_base.txt', encoding='utf_8', mode='r') as f:
+      for base in f.readlines():
+        abbrs_base.add(base.strip())
+    with codecs.open('inflect_ending.txt', encoding='utf_8', mode='r') as f:
+      for ending in f.readlines():
+        abbrs_ending.add(ending.strip())
+    for base in abbrs_base:
+      abbrs.add(base)
+      for ending in abbrs_ending:
+        abbrs.add(base + ending) # some nonsense may be added (like kha) similar to units
     # union of all abbreviations
     abbrs_all = abbrs.union(dot_abbrs).union(units)
 
