@@ -32,8 +32,10 @@ def name_abbrev(word):
   upper = False # there are capital letters in name
   if len(word) > 1: # we assume no 1 letter abbreviations here
     if word[0].isupper():
-      for letter in word[1:len(word)]:
-        if letter.isupper():
+      for position in range(1,len(word)-1):
+        curr = word[position]
+        prev = word[position -1]
+        if curr.isupper() and not prev == u'-':
           upper = True
   return upper
     
