@@ -166,7 +166,11 @@ def word_with_dot(tokens, i):
       return tags
 
 def unknown_token(tokens, i):
-  return [(tokens[i], TAGS.UNKNOWN)]
+  if len(tokens[i]) == 1:
+    # not a letter nor a digit - those are caught before
+    return [(tokens[i], TAGS.INTERP)]
+  # whatever
+  return [(tokens[i], TAGS.WORD)]
 
 interp_hyphens = u'\u2010\u2011\u2012\u2013\u2014\u2015'
 # the last sign here is a triple dot :)
