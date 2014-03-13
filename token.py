@@ -48,13 +48,17 @@ abbrs_base = set()
 abbrs_ending = set()
 dot_abbrs = set()
 abbrs_all = set()
+multi_dot_abbrs = set()
 def abbreviation(tokens, i):
-  global dot_abbrs, abbrs_all, unit_names, unit_prefixes, units, abbrs, abbrs_base, abbrs_ending
+  global dot_abbrs, abbrs_all, unit_names, unit_prefixes, units, abbrs, abbrs_base, abbrs_ending, multi_dot_abbrs
   if not abbrs:
     # known dot abbreviations that can end sentence
     with codecs.open('dots_sorted.txt', encoding='utf_8', mode='r') as f:
       for abbr in f.readlines():
         dot_abbrs.add(abbr.strip()[:-1])
+    with codecs.open('multi_part_dot_abbr.txt', encoding='utf_8', mode='r') as f:
+      for abbr in f.readlines():
+        multi_dot_abbrs.add(abbr.strip()[:-1])
     # ceating possible names of physical units
     with codecs.open('unit_names.txt', encoding='utf_8', mode='r') as f:
       for name in f.readlines():
@@ -83,10 +87,9 @@ def abbreviation(tokens, i):
         abbrs.add(base + ending) # some nonsense may be added (like kha) similar to units
     # union of all abbreviations
     abbrs_all = abbrs.union(dot_abbrs).union(units)
-
   if tokens[i].endswith('.') and len(tokens[i]) > 1: # tokens ends with dot
     t = tokens[i][:-1].split('.')
-    # TODO: assuming roman numerals will be interpreped later and re-tagged
+    # TODO: assuming (proper) roman numerals will be interpreped later and re-tagged
     if len(t) == 1: # we don't have dot inside
       t = t[0]
       if i + 1 < len(tokens): # this is not sentence-ending dot
@@ -95,10 +98,17 @@ def abbreviation(tokens, i):
         if t in abbrs_all or (len(t) == 1 and t.isupper()): # known abbreviation or name initial
           return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
     else: # we have dot(s) inside
-      result = []
-      for st in t:
-        result += [(st, TAGS.ABBR), ('.', TAGS.INTERP)]
-      return result
+      if i + 1 < len(tokens): # this is not sentence-ending dot
+        result = []
+        for st in t:
+          result += [(st, TAGS.ABBR), ('.', TAGS.INTERP)]
+        return result
+      else: # this is sentence-endig dot
+        if tokens[i][:-1] in multi_dot_abbrs or (len(tokens[i][:-1]) == 1 and tokens[i][:-1].isupper()): # known abbreviation or name initial
+          result = []
+          for st in t:
+            result += [(st, TAGS.ABBR), ('.', TAGS.INTERP)]
+          return result
   elif tokens[i] in abbrs.union(units):
     if tokens[i].startswith('e-mail'):
       return [(tokens[i], TAGS.WORD)]
