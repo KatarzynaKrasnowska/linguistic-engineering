@@ -4,7 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{a4wide}
 
-\title{Extended tokenizer for Polish}
+\title{Extended tokeniser for Polish}
 \author{Tomasz Bartosiak \\ Konrad Gołuchowski \\ Katarzyna Krasnowska}
 
 \begin{document}
@@ -13,7 +13,7 @@
 \section{Method description}
 
 \paragraph{}
-The tokenization (augmented with simple tagging with token type) implemented in our program consists of 3 main steps:
+The tokenisation (augmented with simple tagging with token type) implemented in our program consists of 4 main steps:
 
 \subsection{Basic splitting}
 
@@ -29,9 +29,11 @@ In the second stage, the most of the tagging is performed. A~series of token-typ
         \item Recognise a~token as a~concatenation of proper tokens, split them, tag some of them if possible and leave the rest to be recursively passed through the cascade.
         \item Fail to recognise the token: in this case, the next filter from the cascade is applied.
     \end{itemize}
+
+Therefore, at this stage, token boundaries may be either left as they were determined in the previous stage, or tokens may be further split.
     
 \paragraph{}
-The simplest filters use regular expressions. In that way, e.g., roman/arabic numerals, e-mail or www addresses can be tagged. A little more complicated ones may split the token based on a~regular expression and assign all resulting parts a~tag, as is done, e.g., in the case of arabic numerals followed by a dot.
+The simplest filters use regular expressions. In that way, e.g., roman/arabic numerals, e-mail or WWW addresses can be tagged. A little more complicated ones may split the token based on a~regular expression and assign all resulting parts a~tag, as is done, e.g., in the case of arabic numerals followed by a dot.
 
 \subsection{Abbreviations}
 
@@ -50,8 +52,41 @@ All words not ending with dots are checked in our abbreviations library. Part of
 \paragraph{}
 Word connected to sentence-ending dot may also be abbreviation. It is checked in abbreviations library for abbreviations not ending with dots, and for those ending with dots (\texttt{dots\_sorted.txt} and \texttt{multi\_part\_dot\_abbr.txt}).
 
+\paragraph{}
+Below is the list of filters in the order they are applied:
+    \begin{itemize}
+        \item Arabic integer numbers are temporarily assigned a~helper tag \texttt{int} (to distinguish them from fractional numbers when parsing dates).
+        \item Fractional numbers are assigned the \texttt{ara} tag.
+        \item Arabic numbers followed by a dot are split into two tokens and tagged \texttt{ara} and \texttt{punct} respectively.
+        \item Upper-case \textit{I} at the beginning of a sentence and lower-case \textit{i} are tagged \texttt{word} (so that they are not passed to the roman numbers filter).
+        \item \textit{W}, \textit{A} \textit{U}, \textit{Z}, \textit{O} at the beginning of a sentence are tagged as \texttt{word} (so that they are not passed to the abbreviations filter).
+        \item Roman numbers are assigned the \texttt{rom} tag.
+        \item Roman numbers followed by a dot are split into two tokens and tagged \texttt{rom} and \texttt{punct} respectively.
+        \item Dates in format \textit{dd.mm.yyyy} and \textit{dd/mm/yyyy} are temporarily assigned a~helper tag \texttt{date}.
+        \item Month names in nominative\footnote{Although dates written as \textit{1 kwiecień 2014} are considered incorrect, they often appear in written and spoken Polish, so they are taken into account.} and genitive are temporarily assigned helper tags, e.g., \textit{kwietnia} is tagged as \texttt{m-iv} (for the purpose of date parsing).
+        \item Abbreviations and their dots are recognised, split and tagged.
+        \item Tokens consisting only of letters are tagged as \texttt{word}.
+        \item Interpunction characters are tagged as \texttt{interp}.
+        \item A dot-ended token at the end of a sentence is split and tagged.
+        \item WWW addresses are tagged as \texttt{www}.
+        \item Comma-separated sequences are split and tagged.
+        \item Hyphen-separated sequences are split and tagged.
+        \item E-mail addresses are tagged as \texttt{e-mail}.
+        \item Remaining tokens are tagged \texttt{punct} if they are single characters and \texttt{word} otherwise.
+    \end{itemize}
+
 \subsection{Date parsing}
-At this stage, 
+
+\paragraph{}
+Last, dates in various text and number format are recognised based on the processing in the previous stage and appropriate tags are determined, which amounts to parsing the dates and producing their representation in the normalised format \texttt{yyyy.mm.dd}. At this stage, several tokens may be joined back together to form a single one.
+
+\paragraph{}
+In the simplest case, day, month and year are retrieved from tokens recognised as \texttt{date} by the filter cascade. Other date formats are recognised as specific token patterns, e.g., tag=\texttt{int} - tag=\texttt{m-$\ast$} - tag=\texttt{int} - tok=\texttt{"r"} - tok=\texttt{"."} (this matches, for instance, \textit{14 marca 2014 r.}).
+
+\subsection{Clean-up}
+
+\paragraph{}
+To complete the extended tokenisation process, the helper tags \texttt{int} and \texttt{m-$\ast$} tags are replaced with \texttt{ara} and \texttt{word} respectively. As the last small step, \textit{I} and \textit{i} tokens followed by a closing parenthesis \textit{)} are assigned the \texttt{rom} tag (those are most likely items on a~numbered list, but the heuristic for distinguishing between conjuction and roman 1 applied at the filter stage did not look at the next token and tagged them as \texttt{word}).
 
 \section{Authors contribution}
 
@@ -69,7 +104,7 @@ Besides the above, each author provided some testing input files, repeatedly tes
 \paragraph{}
 Python source code:
 \begin{itemize}
-    \item \texttt{main.py} -- the main program file, contains high-level code for handling input/output files and code for first-stage tokenization.
+    \item \texttt{main.py} -- the main program file, contains high-level code for handling input/output files and code for first-stage tokenisation.
     
     \item \texttt{token.py} -- contains filters used in the filters cascade stage.
     
