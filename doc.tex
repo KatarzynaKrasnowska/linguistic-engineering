@@ -1,0 +1,87 @@
+\documentclass[oneside,12pt]{article}
+
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+
+\title{Extended tokenizer for Polish}
+\author{Tomasz Bartosiak \\ Konrad Gołuchowski \\ Katarzyna Krasnowska}
+
+\begin{document}
+\maketitle
+
+\section{Method description}
+
+\paragraph{}
+The tokenization (augmented with simple tagging with token type) implemented in our program consists of 3 main steps:
+
+\subsection{Basic splitting}
+
+\paragraph{}
+At this stage, the most basic splitting operations are performed on the input text. Each sentence is split on spaces. Additionaly, when the resulting tokens begin or end with interpunction characters, the leading and trailing iterpunction is stripped into separate tokens. This allows, e.g., for separating parentheses, colons and semicolons from neighbouring tokens. An exception from this is the treatment of a dot preceded by a non-interpunction character. Such a dot is kept within the same token for later processing of abbreviations.
+
+\subsection{Filters cascade}
+
+\paragraph{}
+In the second stage, the most of the tagging is performed. A~series of token-type filters is defined together with an order in which they are applied, forming what we called a~\textit{filters cascade}. Each filter may either:
+    \begin{itemize}
+        \item Recognise a~token as belonging to one of the defined types and tag it. In this case, the tagging is done for the given token and the cascade is run on the next token.
+        \item Recognise a~token as a~concatenation of proper tokens, split them, tag some of them if possible and leave the rest to be recursively passed through the cascade.
+        \item Fail to recognise the token: in this case, the next filter from the cascade is applied.
+    \end{itemize}
+    
+\paragraph{}
+The simplest filters use regular expressions. In that way, e.g., roman/arabic numerals, e-mail or www addresses can be tagged. A little more complicated ones may split the token based on a~regular expression and assign all resulting parts a~tag, as is done, e.g., in the case of arabic numerals followed by a dot.
+
+\paragraph{}
+The most complex filter is the one used for recognising abbreviations. It makes use of some predefined list of valid abbreviations of different type, included in \texttt{.txt} files (see the files description at the end of this document). \textit{[... more details about abbreviations...]}
+
+\subsection{Date parsing}
+At this stage, 
+
+\section{Authors contribution}
+
+\paragraph{Tomasz Bartosiak:} handling XML format of input/output files, abbreviations.
+
+\paragraph{Konrad Gołuchowski:} filters cascade stage: project and particular filters.
+
+\paragraph{Katarzyna Krasnowska:} filters cascade stage: particular filters, dates.
+
+\paragraph{}
+Besides the above, each author provided some testing input files, repeatedly tested the method against those files and fixed or reported detected problems. 
+
+\section{Files description}
+
+\paragraph{}
+Python source code:
+\begin{itemize}
+    \item \texttt{main.py} -- the main program file, contains high-level code for handling input/output files and code for first-stage tokenization.
+    
+    \item \texttt{token.py} -- contains filters used in the filters cascade stage.
+    
+    \item \texttt{date.py} -- contains code for handling dates.
+    
+    \item \texttt{tags.py} -- tag names defined as constants for convenience.
+    
+    \item \texttt{ext\_tokenizer\_xml\_parsing.py} -- contains code for parsing and printing XML files.
+\end{itemize}
+
+\paragraph{}
+Other files used by the program:
+\begin{itemize}
+    \item \texttt{dots\_sorted.txt} -- list of abbreviations ending with dot.
+    
+    \item \texttt{multi\_part\_dot\_abbr.txt} -- list of multi-part abbreviations ending with dot.
+    
+    \item \texttt{unit\_names.txt} -- list of abbreviations for physical units.
+    
+    \item \texttt{unit\_prefixes.txt} -- list of prefixes for physical units.
+    
+    \item \texttt{uninflected.txt} -- list of uninflected abbreviations not ending with dot
+    
+    \item \texttt{inflect\_base.txt} -- list of stems for inflected abbreviations.
+    
+    \item \texttt{inflect\_ending.txt} -- list of possible endings for inflected forms of abbreviations.
+\end{itemize}
+
+\end{document}
