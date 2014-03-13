@@ -35,22 +35,24 @@ Therefore, at this stage, token boundaries may be either left as they were deter
 \paragraph{}
 The simplest filters use regular expressions. In that way, e.g., roman/arabic numerals, e-mail or WWW addresses can be tagged. A little more complicated ones may split the token based on a~regular expression and assign all resulting parts a~tag, as is done, e.g., in the case of arabic numerals followed by a dot.
 
-\subsection{Abbreviations}
+\subsubsection{Abbreviations}
 
 \paragraph{}
 The most complex filter is the one used for recognising abbreviations. It uses some general heuristics and makes use of some predefined list of valid abbreviations of different type, included in \texttt{.txt} files (see the files description at the end of this document) for special cases.
 
 \paragraph{}
-First heurisic marks everything that ends with dot (other then sentence-ending dot) as abbreviations, those abbreviations are either uninflected or are non-basic form of some inflected abbreviation (eg. "do dr. Pawłowskiego"). For multi-part abbreviations (eg. "m.in.") all parts are treated individualy (there are 4 tones in this example: "m", ".", "in", ".").
+The first heuristic marks everything that ends with a~dot (other than a~sentence-ending dot) as abbreviation. Those are eithe non-inflecting abbreviations or inflected forms of some other abbreviation (e.g., \textit{do dr. Pawłowskiego}). In the case of multi-part abbreviations (e.g., \textit{m.in.}) all parts are treated individualy (soe there are 4 tokes in this example: \textit{m}/\texttt{abbrev} \textit{.}/\texttt{punct} \textit{in}/\texttt{abbrev} \textit{.}/\texttt{punct}).
 
 \paragraph{}
-Second heuristic marks every token with more then begins with capital letter and has at least one more inside (not counting those strictly after dash (like in "Austro-Węgry")), inflected forms of such abbreviations are also (mostly) cought with this simple filter.
+The second heuristic marks every token which begins with an upper-case capital letter and has at least one more inside (not counting those which appear after a dash, like in \textit{Austro-Węgry}). This heuristic aims at recognising abbreviations such as \textit{PKO}, \textit{PKiN}. Inflected forms of such abbreviations are also (mostly) recognised with this simple filter, e.g., \textit{w OSiR-ze}.
 
 \paragraph{}
-All words not ending with dots are checked in our abbreviations library. Part of this library for such abbreviations includes physical units with prefixes (\texttt{unit\_prefixes.txt} + \texttt{unit\_names.txt}), uninflected abbreviations (\texttt{uninflected.txt}) and naively created forms of inflected abbreviations (\texttt{inflect\_base.txt} + \texttt{inflect\_ending.txt}).
+All words not ending with dots are looked up on our abbreviations list. The list includes physical units with optional prefixes (\texttt{unit\_prefixes.txt} + \texttt{unit\_names.txt}), uninflected abbreviations (\texttt{uninflected.txt}) and naively created forms of inflected abbreviations (\texttt{inflect\_base.txt} + \texttt{inflect\_ending.txt}).
 
 \paragraph{}
-Word connected to sentence-ending dot may also be abbreviation. It is checked in abbreviations library for abbreviations not ending with dots, and for those ending with dots (\texttt{dots\_sorted.txt} and \texttt{multi\_part\_dot\_abbr.txt}).
+A dot-ended token at the end of a sentence may also be an abbreviation. It is looked up among the abbreviations not ending with a dot, and those ending with dots (\texttt{dots\_sorted.txt} and \texttt{multi\_part\_dot\_abbr.txt}).
+
+\subsubsection{List of applied filters}
 
 \paragraph{}
 Below is the list of filters in the order they are applied:
@@ -59,7 +61,7 @@ Below is the list of filters in the order they are applied:
         \item Fractional numbers are assigned the \texttt{ara} tag.
         \item Arabic numbers followed by a dot are split into two tokens and tagged \texttt{ara} and \texttt{punct} respectively.
         \item Upper-case \textit{I} at the beginning of a sentence and lower-case \textit{i} are tagged \texttt{word} (so that they are not passed to the roman numbers filter).
-        \item \textit{W}, \textit{A} \textit{U}, \textit{Z}, \textit{O} at the beginning of a sentence are tagged as \texttt{word} (so that they are not passed to the abbreviations filter).
+        \item \textit{W}, \textit{A}, \textit{U}, \textit{Z}, \textit{O} at the beginning of a sentence are tagged as \texttt{word} (so that they are not passed to the abbreviations filter).
         \item Roman numbers are assigned the \texttt{rom} tag.
         \item Roman numbers followed by a dot are split into two tokens and tagged \texttt{rom} and \texttt{punct} respectively.
         \item Dates in format \textit{dd.mm.yyyy} and \textit{dd/mm/yyyy} are temporarily assigned a~helper tag \texttt{date}.
@@ -88,7 +90,7 @@ In the simplest case, day, month and year are retrieved from tokens recognised a
 \paragraph{}
 To complete the extended tokenisation process, the helper tags \texttt{int} and \texttt{m-$\ast$} tags are replaced with \texttt{ara} and \texttt{word} respectively. As the last small step, \textit{I} and \textit{i} tokens followed by a closing parenthesis \textit{)} are assigned the \texttt{rom} tag (those are most likely items on a~numbered list, but the heuristic for distinguishing between conjuction and roman 1 applied at the filter stage did not look at the next token and tagged them as \texttt{word}).
 
-\section{Authors contribution}
+\section{Authors' contributions}
 
 \paragraph{Tomasz Bartosiak:} handling XML format of input/output files, abbreviations.
 
