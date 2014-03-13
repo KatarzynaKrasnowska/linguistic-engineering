@@ -1,0 +1,118 @@
+\documentclass[12pt]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{latexsym}
+\usepackage{xcolor}
+\usepackage{iwona}
+\usepackage[round]{natbib}
+\usepackage{fixltx2e} %for subscripts
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bbm}
+\usepackage{polski}
+
+\mode<handout>{
+    \usepackage{pgfpages}
+    \pgfpagesuselayout{4 on 1}[a4paper,
+    border shrink=5mm,landscape]
+    \setbeamercolor{background canvas}{bg=black!3}
+}
+\definecolor{wlasny}{rgb}{.125,.5,.15}
+\usecolortheme[named=wlasny]{structure}
+
+\mode<beamer>{%
+  \usetheme{IPI}
+}
+
+\AtBeginSection[]
+{
+   \begin{frame}
+       \frametitle{Outline}
+       \tableofcontents[currentsection]
+   \end{frame}
+}
+
+
+\title{Extended tokenizer for Polish}
+\author{Tomasz Bartosiak \\ Konrad Gołuchowski \\ Katarzyna Krasnowska}
+\date{14 March 2014}
+
+\begin{document}
+%-------------------------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+%-------------------------------------------------------------------------------
+\begin{frame}{Stage 1: token splitting}
+    \begin{itemize}
+        \item Text is split on spaces.
+        \item Additionally, leading and trailing punctuation marks are separated:
+            \begin{itemize}
+                \item exception: dot preceded by non-punctuation,
+                \item exception from exception: three consecutive dots.
+            \end{itemize} 
+    \end{itemize}
+\end{frame}
+%-------------------------------------------------------------------------------
+\begin{frame}{Stage 2: token tagging (and further splitting)}
+    \begin{itemize}
+        \item Cascade of tag filters.
+        \item Regular expression-based, e.g.:
+            \begin{itemize}
+                \item \texttt{rom}, \texttt{ara}, \texttt{e-mail}, \texttt{www}
+                \item dates in formats 14.03.2014, 14.03.2014.
+            \end{itemize}
+        \item More complicated, e.g.:
+            \begin{itemize}
+                \item abbreviations,
+                \item \textit{I}/\textit{i} conjunction,
+                \item hyphen-separated tokens.
+            \end{itemize}
+        \item Helper tags:
+            \begin{itemize}
+                \item \texttt{int} for arabic integers,
+                \item \texttt{date} for dates as above,
+                \item \texttt{m-i}, ..., \texttt{m-xii} for month names.
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+%-------------------------------------------------------------------------------
+\begin{frame}{Stage 2: abbreviations}
+    \begin{itemize}
+        \item A list of about 1300 abbreviations is used.
+        \item Dot-ended abbreviations identical with some other word's inflected form:
+            \begin{itemize}
+                \item e.g., \textit{giełd.}, \textit{gwar.}, \textit{ul.}
+                \item heuristic: only tag as \texttt{abbrev} in the middle of a sentence.
+            \end{itemize}
+        \item Other dot-ended abbreviations:
+            \begin{itemize}
+                \item e.g., \textit{dot.}, \textit{egip.}, \textit{popr.}
+            \end{itemize}
+        \item Mutli-part abbreviations:
+            \begin{itemize}
+                \item e.g., \textit{m.in.}, \textit{p.n.e.}
+            \end{itemize}
+        \item Abbreviations without the dot:
+            \begin{itemize}
+                \item e.g., \textit{mjr}, \textit{s-ka}, \textit{EUR}, \textit{MB}
+                \item can be inflected: \textit{dra}, \textit{OSiR-u}.
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+%-------------------------------------------------------------------------------
+\begin{frame}{Stage 3: date parsing}
+    \begin{itemize}
+        \item Straightforward for \texttt{date}-tagged tokens.
+        \item Look for specific token/tag sequences, e.g.:
+            \begin{itemize}
+                \item tag=\texttt{int} - tag=\texttt{rom} - tag=\texttt{int}
+                \item tag=\texttt{int} - tag=\texttt{m-$\ast$} - tag=\texttt{int} - tok=\texttt{"r"} - tok=\texttt{"."}
+            \end{itemize}
+        \item Check day and month range.
+        \item Merge tokens into one and assign them appropriate tag.
+        \item Replace remaining \texttt{int} and \texttt{m-$\ast$} tags with \texttt{ara} and \texttt{word} respectively.
+    \end{itemize}
+\end{frame}
+%-------------------------------------------------------------------------------
+\end{document}
