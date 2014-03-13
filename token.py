@@ -93,7 +93,10 @@ def abbreviation(tokens, i):
       if t in abbrs_all or (len(t) == 1 and t.isupper()): # known abbreviation or name initial
         return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
   elif tokens[i] in abbrs.union(units):
-    return [(tokens[i], TAGS.ABBR)]
+    if tokens[i].startswith('e-mail'):
+      return [(tokens[i], TAGS.WORD)]
+    else:
+      return [(tokens[i], TAGS.ABBR)]
   elif name_abbrev(tokens[i]): # PZPR, PKiN, etc.; may lead to problems with fully capitalized words or roman numerals
     return [(tokens[i], TAGS.ABBR)]
 
