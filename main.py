@@ -9,8 +9,21 @@ import sys
 from dates import parse_dates
 from ext_tokenizer_xml_parsing import make_parser, TreeHandler
 from token import assign_tags, interp_not_dot
+from tags import TAGS
 
 interpunction = u'():;-'
+
+def correct_i(tokens):
+    ret = []
+    for i in xrange(0, len(tokens)):
+        tok, tag = tokens[i]
+        if i < len(tokens) - 1 and tok == u'i':
+            tok2, tag2 = tokens[i + 1]
+            if tok2 == u')':
+                tag = TAGS.ROM
+        ret.append((tok, tag))
+    return ret
+            
 
 def tokenize_sentence(sentence):
     words = []
@@ -34,11 +47,7 @@ def tokenize_sentence(sentence):
         if w:
             words.append(w)
         words += ws
-        #ws = [token.strip() for token in re.split('^([\:\;\-\?\!\(\)])', w, re.UNICODE) if token.strip()]
-        #words += ws[:-1]
-        #w = ws[-1]
-        #words += [token.strip() for token in re.split('([\:\;\-\?\!\(\)])$', w, re.UNICODE) if token.strip()]
-    return parse_dates(assign_tags(words))
+    return correct_i(parse_dates(assign_tags(words)))
 
 def main():
     if len(sys.argv) < 3:
