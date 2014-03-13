@@ -171,9 +171,10 @@ def hyphen_separated_tokens(tokens, i):
 
 def word_with_dot(tokens, i):
   if tokens[i].endswith('.'):
-    if i < len(tokens) - 1:
-      return [(tokens[i], TAGS.ABBR)]
-    else:
+    #if i < len(tokens) - 1:
+    #  return [(tokens[i], TAGS.ABBR)]
+    #else:
+    if i == len(tokens) - 1:
       subtokens = [token.strip() for token in re.split('(\.)$', tokens[i], re.UNICODE)]
       tags = itertools.chain.from_iterable(
                (assign_tag(subtokens, i) for i, token in enumerate(subtokens) if token))
