@@ -17,7 +17,7 @@ def correct_i(tokens):
     ret = []
     for i in xrange(0, len(tokens)):
         tok, tag = tokens[i]
-        if i < len(tokens) - 1 and tok == u'i':
+        if i < len(tokens) - 1 and tok in (u'i', u'I'):
             tok2, tag2 = tokens[i + 1]
             if tok2 == u')':
                 tag = TAGS.ROM
