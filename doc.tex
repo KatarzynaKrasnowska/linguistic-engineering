@@ -4,7 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{a4wide}
 
-\title{Extended tokeniser for Polish}
+\title{Extended tokenizer for Polish}
 \author{Tomasz Bartosiak \\ Konrad Gołuchowski \\ Katarzyna Krasnowska}
 
 \begin{document}
@@ -13,12 +13,19 @@
 \section{Method description}
 
 \paragraph{}
-The tokenisation (augmented with simple tagging with token type) implemented in our program consists of 4 main steps:
+The tokenization (augmented with simple tagging with token type) implemented in
+our program consists of 4 main steps described in following sections:
+\begin{itemize}
+  \item basic tokenization,
+  \item filters cascade,
+  \item date parsing,
+  \item tags clean up.
+\end{itemize}
 
 \subsection{Basic splitting}
 
 \paragraph{}
-At this stage, the most basic splitting operations are performed on the input text. Each sentence is split on spaces. Additionaly, when the resulting tokens begin or end with interpunction characters, the leading and trailing iterpunction is stripped into separate tokens. This allows, e.g., for separating parentheses, colons and semicolons from neighbouring tokens. An exception from this is the treatment of a dot preceded by a non-interpunction character. Such a dot is kept within the same token for later processing of abbreviations.
+At this stage, the most basic splitting operations are performed on the input text. Each sentence is split with spaces. Additionally, when the resulting tokens begin or end with interpunction characters, the leading and trailing interpunction are stripped and added as separate tokens. This allows, e.g., for separating parentheses, colons and semicolons from neighbouring tokens. An exception from this is the treatment of a dot preceded by a non-interpunction character. Such a dot is kept within the same token for later processing of abbreviations.
 
 \subsection{Filters cascade}
 
@@ -41,7 +48,7 @@ The simplest filters use regular expressions. In that way, e.g., roman/arabic nu
 The most complex filter is the one used for recognising abbreviations. It uses some general heuristics and makes use of some predefined list of valid abbreviations of different type, included in \texttt{.txt} files (see the files description at the end of this document) for special cases.
 
 \paragraph{}
-The first heuristic marks everything that ends with a~dot (other than a~sentence-ending dot) as abbreviation. Those are eithe non-inflecting abbreviations or inflected forms of some other abbreviation (e.g., \textit{do dr. Pawłowskiego}). In the case of multi-part abbreviations (e.g., \textit{m.in.}) all parts are treated individualy (soe there are 4 tokes in this example: \textit{m}/\texttt{abbrev} \textit{.}/\texttt{punct} \textit{in}/\texttt{abbrev} \textit{.}/\texttt{punct}).
+The first heuristic marks everything that ends with a~dot (other than a~sentence-ending dot) as abbreviation. Those are either non-inflecting abbreviations or inflected forms of some other abbreviation (e.g., \textit{do dr. Pawłowskiego}). In the case of multi-part abbreviations (e.g., \textit{m.in.}) all parts are treated individually (so there are 4 tokes in this example: \textit{m}/\texttt{abbrev} \textit{.}/\texttt{punct} \textit{in}/\texttt{abbrev} \textit{.}/\texttt{punct}).
 
 \paragraph{}
 The second heuristic marks every token which begins with an upper-case capital letter and has at least one more inside (not counting those which appear after a dash, like in \textit{Austro-Węgry}). This heuristic aims at recognising abbreviations such as \textit{PKO}, \textit{PKiN}. Inflected forms of such abbreviations are also (mostly) recognised with this simple filter, e.g., \textit{w OSiR-ze}.
@@ -80,7 +87,7 @@ Below is the list of filters in the order they are applied:
 \subsection{Date parsing}
 
 \paragraph{}
-Last, dates in various text and number format are recognised based on the processing in the previous stage and appropriate tags are determined, which amounts to parsing the dates and producing their representation in the normalised format \texttt{yyyy.mm.dd}. At this stage, several tokens may be joined back together to form a single one.
+Last but not least, dates in various text and number format are recognised based on the processing in the previous stage and appropriate tags are determined, which amounts to parsing the dates and producing their representation in the normalised format \texttt{yyyy.mm.dd}. At this stage, several tokens may be joined back together to form a single one.
 
 \paragraph{}
 In the simplest case, day, month and year are retrieved from tokens recognised as \texttt{date} by the filter cascade. Other date formats are recognised as specific token patterns, e.g., tag=\texttt{int} - tag=\texttt{m-$\ast$} - tag=\texttt{int} - tok=\texttt{"r"} - tok=\texttt{"."} (this matches, for instance, \textit{14 marca 2014 r.}).
@@ -88,7 +95,7 @@ In the simplest case, day, month and year are retrieved from tokens recognised a
 \subsection{Clean-up}
 
 \paragraph{}
-To complete the extended tokenisation process, the helper tags \texttt{int} and \texttt{m-$\ast$} tags are replaced with \texttt{ara} and \texttt{word} respectively. As the last small step, \textit{I} and \textit{i} tokens followed by a closing parenthesis \textit{)} are assigned the \texttt{rom} tag (those are most likely items on a~numbered list, but the heuristic for distinguishing between conjuction and roman 1 applied at the filter stage did not look at the next token and tagged them as \texttt{word}).
+To complete the extended tokenization process, the helper tags \texttt{int} and \texttt{m-$\ast$} tags are replaced with \texttt{ara} and \texttt{word} respectively. As the last small step, \textit{I} and \textit{i} tokens followed by a closing parenthesis \textit{)} are assigned the \texttt{rom} tag (those are most likely items on a~numbered list, but the heuristic for distinguishing between conjunction and roman 1 applied at the filter stage did not look at the next token and tagged them as \texttt{word}).
 
 \section{Authors' contributions}
 
@@ -106,7 +113,7 @@ Besides the above, each author provided some testing input files, repeatedly tes
 \paragraph{}
 Python source code:
 \begin{itemize}
-    \item \texttt{main.py} -- the main program file, contains high-level code for handling input/output files and code for first-stage tokenisation.
+    \item \texttt{main.py} -- the main program file, contains high-level code for handling input/output files and code for first-stage tokenization.
     
     \item \texttt{token.py} -- contains filters used in the filters cascade stage.
     
