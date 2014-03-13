@@ -85,13 +85,21 @@ def abbreviation(tokens, i):
     abbrs_all = abbrs.union(dot_abbrs).union(units)
 
   if tokens[i].endswith('.') and len(tokens[i]) > 1: # tokens ends with dot
-    t = tokens[i][:-1]
+    t = tokens[i][:-1].split('.')
     # TODO: assuming roman numerals will be interpreped later and re-tagged
-    if i + 1 < len(tokens): # this is not sentence-ending dot
-      return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
-    else: # this is sentence-endig dot
-      if t in abbrs_all or (len(t) == 1 and t.isupper()): # known abbreviation or name initial
+    if len(t) == 1: # we don't have dot inside
+      t = t[0]
+      if i + 1 < len(tokens): # this is not sentence-ending dot
         return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
+      else: # this is sentence-endig dot
+        if t in abbrs_all or (len(t) == 1 and t.isupper()): # known abbreviation or name initial
+          return [(t, TAGS.ABBR), ('.', TAGS.INTERP)]
+    else: # we have dot(s) inside
+      result = []
+      for st in t:
+        print st
+        result += [(st, TAGS.ABBR), ('.', TAGS.INTERP)]
+      return result
   elif tokens[i] in abbrs.union(units):
     if tokens[i].startswith('e-mail'):
       return [(tokens[i], TAGS.WORD)]
