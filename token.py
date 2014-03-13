@@ -16,6 +16,10 @@ def ara_with_dot(tokens, i):
   if match is not None:
     return [(match.group(1), TAGS.ARA), (u'.', TAGS.INTERP), (match.group(2), TAGS.ARA)]
 
+def rom_with_dot(tokens, i):
+  match = re.match(r'^(([ivxlcdm]+)|([IVXLCDM]+))\.$', tokens[i], re.UNICODE)
+  if match is not None:
+    return [(match.group(1), TAGS.ROM), (u'.', TAGS.INTERP)]
 
 # Sentences starting with [WAUZO] (W czym, A co, U kogo, Z kim, O czym)
 def first_conj(tokens, i):
@@ -185,6 +189,7 @@ SIMPLE_TAG_FILTERS = [
     conjunction_i,
     first_conj,
     regexp_based_tag(r'^(([ivxlcdm]+)|([IVXLCDM]+))$', TAGS.ROM), # OK, this is not neccesarly roman number :)
+    rom_with_dot,
     regexp_based_tag(r'^([0-9]{0,2}[\.\/]((0?[1-9])|(1[0-2]))[\.\/][1-9][0-9]{1,3})$', TAGS.DATE),
     month,
     abbreviation,

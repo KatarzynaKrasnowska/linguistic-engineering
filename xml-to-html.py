@@ -34,6 +34,9 @@ def main():
                     tag = match.group(1)
                     color = tag_color(tag)
                     html.write('<td style="background-color:%s;"><i>%s</i></td></tr>\n' % (color, tag))
+                match = re.match(r'.*</s>.*', l, re.UNICODE)
+                if match:
+                    html.write('<tr><td>&nbsp</td><td>&nbsp</td></tr>\n')
             html.write('</table>\n</body>\n')
 
 if __name__ == '__main__':
