@@ -12,6 +12,8 @@ colors = {
     'rom' : 'LightSteelBlue',
     'abbrev' : 'Khaki',
     'punct' : 'LightSalmon',
+    'www' : 'SkyBlue',
+    'email' : 'GreenYellow',
 }
 
 def tag_color(tag):
